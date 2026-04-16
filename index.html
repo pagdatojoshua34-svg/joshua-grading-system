@@ -181,6 +181,7 @@ tr:hover{
 <tr>
 <th>Subject</th>
 <th>Grade</th>
+<th>Equivalent (× %)</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -188,8 +189,18 @@ tr:hover{
 <tbody>
 
 <tr>
-<td>IAS 302</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
+<td>Quic (20%)</td>
+<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+<td class="equiv">0</td>
+<td>
+<button class="edit-btn" onclick="editSubject(this)">Edit</button>
+<button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
+</td>
+</tr>
+<tr>
+<td>Laboratory (30%)</td>
+<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+<td class="equiv">0</td>
 <td>
 <button class="edit-btn" onclick="editSubject(this)">Edit</button>
 <button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
@@ -197,49 +208,37 @@ tr:hover{
 </tr>
 
 <tr>
-<td>SA 301</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
+<td>Assignment (10%)</td>
+<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+<td class="equiv">0</td>
 <td>
 <button class="edit-btn" onclick="editSubject(this)">Edit</button>
 <button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
 </td>
 </tr>
 
+
 <tr>
-<td>SIA 302</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
+<td>Attendance (10%)</td>
+<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+<td class="equiv">0</td>
 <td>
 <button class="edit-btn" onclick="editSubject(this)">Edit</button>
 <button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
 </td>
 </tr>
 
+
 <tr>
-<td>IT ELECT 3</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
+<td>Major Exam (30%)</td>
+<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+<td class="equiv">0</td>
 <td>
 <button class="edit-btn" onclick="editSubject(this)">Edit</button>
 <button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
 </td>
 </tr>
 
-<tr>
-<td>IT ELECT 4</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
-<td>
-<button class="edit-btn" onclick="editSubject(this)">Edit</button>
-<button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
-</td>
-</tr>
-
-<tr>
-<td>CAP 301</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
-<td>
-<button class="edit-btn" onclick="editSubject(this)">Edit</button>
-<button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
-</td>
-</tr>
 
 </tbody>
 </table>
@@ -305,7 +304,8 @@ let table=document.querySelector("#gradeTable tbody");
 let row=`
 <tr>
 <td>${subject}</td>
-<td><input type="number" class="grade" oninput="calculateAverage()"></td>
+<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+<td class="equiv">0</td>
 <td>
 <button class="edit-btn" onclick="editSubject(this)">Edit</button>
 <button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
@@ -420,6 +420,25 @@ grades.forEach(grade => {
 });
 
 document.getElementById("average").innerText = '0';
+
+
+function calculateAll(input){
+
+let row = input.parentElement.parentElement;
+let grade = parseFloat(input.value) || 0;
+
+// Example: each subject = 100%, divide equally
+let totalSubjects = document.querySelectorAll(".grade").length;
+let weight = 1 / totalSubjects;
+
+// Equivalent
+let equiv = grade * weight;
+
+// Show equivalent
+row.querySelector(".equiv").innerText = equiv.toFixed(2);
+
+// Recalculate average also
+calculateAverage();
 
 }
 
