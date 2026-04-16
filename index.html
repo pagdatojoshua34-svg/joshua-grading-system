@@ -181,7 +181,7 @@ tr:hover{
 <tr>
 <th>Subject</th>
 <th>Grade</th>
-<th>Equivalent (× %)</th>
+<th>Equivalent</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -274,174 +274,147 @@ Average Grade: <span id="average">0</span>
 
 let submittedRecords = [];
 
-function calculateAverage(){
+function calculateAverage() {
+    let grades = document.querySelectorAll(".grade");
+    let total = 0;
+    let count = 0;
 
-let grades=document.querySelectorAll(".grade");
-let total=0;
-let count=0;
+    grades.forEach(g => {
+        if (g.value !== "") {
+            total += parseFloat(g.value);
+            count++;
+        }
+    });
 
-grades.forEach(g=>{
-    if(g.value!=""){
-        total+=parseFloat(g.value);
-        count++;
+    let avg = count > 0 ? (total / count).toFixed(2) : 0;
+    document.getElementById("average").innerText = avg;
+}
+
+function calculateAll(input) {
+    let row = input.parentElement.parentElement;
+    let grade = parseFloat(input.value) || 0;
+
+    let totalSubjects = document.querySelectorAll(".grade").length;
+    let weight = 1 / totalSubjects;
+
+    let equiv = grade * weight;
+    row.querySelector(".equiv").innerText = equiv.toFixed(2);
+
+    calculateAverage();
+}
+
+function addSubject() {
+    let subject = prompt("Enter Subject Name:");
+
+    if (subject) {
+        let table = document.querySelector("#gradeTable tbody");
+
+        let row = `
+        <tr>
+            <td>${subject}</td>
+            <td><input type="number" class="grade" oninput="calculateAll(this)"></td>
+            <td class="equiv">0</td>
+            <td>
+                <button class="edit-btn" onclick="editSubject(this)">Edit</button>
+                <button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
+            </td>
+        </tr>
+        `;
+
+        table.innerHTML += row;
     }
-});
-
-let avg=count>0 ? (total/count).toFixed(2) : 0;
-
-document.getElementById("average").innerText=avg;
-
 }
 
-function addSubject(){
-
-let subject=prompt("Enter Subject Name:");
-
-if(subject){
-
-let table=document.querySelector("#gradeTable tbody");
-
-let row=`
-<tr>
-<td>${subject}</td>
-<td><input type="number" class="grade" oninput="calculateAll(this)"></td>
-<td class="equiv">0</td>
-<td>
-<button class="edit-btn" onclick="editSubject(this)">Edit</button>
-<button class="delete-btn" onclick="deleteSubject(this)">Delete</button>
-</td>
-</tr>
-`;
-
-table.innerHTML+=row;
-
+function deleteSubject(btn) {
+    btn.parentElement.parentElement.remove();
+    calculateAverage();
 }
 
+function editSubject(btn) {
+    let row = btn.parentElement.parentElement;
+    let subject = row.children[0];
+
+    let newName = prompt("Edit Subject Name:", subject.innerText);
+
+    if (newName) {
+        subject.innerText = newName;
+    }
 }
 
-function deleteSubject(btn){
+function submitGrades() {
+    let studentName = document.getElementById("studentName").value.trim();
+    let section = document.getElementById("section").value.trim();
+    let average = document.getElementById("average").innerText;
 
-btn.parentElement.parentElement.remove();
-calculateAverage();
+    if (!studentName) {
+        alert("Please enter student name");
+        return;
+    }
 
-}
+    if (!section) {
+        alert("Please enter section");
+        return;
+    }
 
-function editSubject(btn){
+    let currentDate = new Date();
+    let formattedDate = currentDate.toLocaleDateString() + " " + currentDate.toLocaleTimeString();
 
-let row=btn.parentElement.parentElement;
-let subject=row.children[0];
+    let record = {
+        studentName,
+        section,
+        average,
+        submissionDate: formattedDate,
+        id: Date.now()
+    };
 
-let newName=prompt("Edit Subject Name:",subject.innerText);
-
-if(newName){
-subject.innerText=newName;
-}
-
-}
-
-function submitGrades(){
-
-let studentName = document.getElementById("studentName").value.trim();
-let section = document.getElementById("section").value.trim();
-let average = document.getElementById("average").innerText;
-
-if(!studentName){
-    alert("Please enter student name");
-    return;
-}
-
-if(!section){
-    alert("Please enter section");
-    return;
-}
-
-let currentDate = new Date();
-let formattedDate = currentDate.toLocaleDateString() + " " + currentDate.toLocaleTimeString();
-
-let record = {
-    studentName: studentName,
-    section: section,
-    average: average,
-    submissionDate: formattedDate,
-    id: Date.now()
-};
-
-submittedRecords.push(record);
-displayRecords();
-resetForm();
-
-alert("Grades submitted successfully!");
-
-}
-
-function displayRecords(){
-
-let recordsBody = document.getElementById("recordsBody");
-
-if(submittedRecords.length === 0){
-    recordsBody.innerHTML = '<tr><td colspan="5" class="no-records">No records submitted yet</td></tr>';
-    return;
-}
-
-recordsBody.innerHTML = '';
-
-submittedRecords.forEach(record => {
-    let row = `
-    <tr>
-    <td>${record.studentName}</td>
-    <td>${record.section}</td>
-    <td>${record.average}</td>
-    <td>${record.submissionDate}</td>
-    <td><button class="delete-record-btn" onclick="deleteRecord(${record.id})">Delete</button></td>
-    </tr>
-    `;
-    recordsBody.innerHTML += row;
-});
-
-}
-
-function deleteRecord(id){
-
-if(confirm("Are you sure you want to delete this record?")){
-    submittedRecords = submittedRecords.filter(record => record.id !== id);
+    submittedRecords.push(record);
     displayRecords();
+    resetForm();
+
+    alert("Grades submitted successfully!");
 }
 
+function displayRecords() {
+    let recordsBody = document.getElementById("recordsBody");
+
+    if (submittedRecords.length === 0) {
+        recordsBody.innerHTML = '<tr><td colspan="5" class="no-records">No records submitted yet</td></tr>';
+        return;
+    }
+
+    recordsBody.innerHTML = "";
+
+    submittedRecords.forEach(record => {
+        recordsBody.innerHTML += `
+        <tr>
+            <td>${record.studentName}</td>
+            <td>${record.section}</td>
+            <td>${record.average}</td>
+            <td>${record.submissionDate}</td>
+            <td>
+                <button class="delete-record-btn" onclick="deleteRecord(${record.id})">Delete</button>
+            </td>
+        </tr>
+        `;
+    });
 }
 
-function resetForm(){
-
-document.getElementById("studentName").value = '';
-document.getElementById("section").value = '';
-
-let grades = document.querySelectorAll(".grade");
-grades.forEach(grade => {
-    grade.value = '';
-});
-
-document.getElementById("average").innerText = '0';
-
-
-function calculateAll(input){
-
-let row = input.parentElement.parentElement;
-let grade = parseFloat(input.value) || 0;
-
-// Example: each subject = 100%, divide equally
-let totalSubjects = document.querySelectorAll(".grade").length;
-let weight = 1 / totalSubjects;
-
-// Equivalent
-let equiv = grade * weight;
-
-// Show equivalent
-row.querySelector(".equiv").innerText = equiv.toFixed(2);
-
-// Recalculate average also
-calculateAverage();
-
+function deleteRecord(id) {
+    if (confirm("Are you sure you want to delete this record?")) {
+        submittedRecords = submittedRecords.filter(r => r.id !== id);
+        displayRecords();
+    }
 }
 
+function resetForm() {
+    document.getElementById("studentName").value = "";
+    document.getElementById("section").value = "";
+
+    document.querySelectorAll(".grade").forEach(g => g.value = "");
+    document.querySelectorAll(".equiv").forEach(e => e.innerText = "0");
+
+    document.getElementById("average").innerText = "0";
+}
 </script>
 
 </body>
