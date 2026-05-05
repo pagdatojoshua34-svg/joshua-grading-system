@@ -157,7 +157,63 @@ tr:hover{
     padding:20px;
     font-style:italic;
 }
+/* 🔴 COMPONENT BREAKDOWN STYLE */
 
+.component-box {
+    margin-top: 30px;
+    background: #2a0000;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.component-header {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    background: #5a0000;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.component-row {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #555;
+}
+
+.comp-title {
+    text-align: center;
+}
+
+.comp-items {
+    padding: 10px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #7a0000;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.item input {
+    width: 80px;
+}
+
+.item button {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+}
+
+.comp-total {
+    text-align: center;
+}
 </style>
 </head>
 
@@ -172,7 +228,54 @@ tr:hover{
 
 <label>Section:</label>
 <input type="text" id="section" placeholder="Enter section">
-<br>
+    <!-- 🔴 COMPONENT BREAKDOWN TABLE (ADDED) -->
+<div class="component-box">
+
+    <div class="component-header">
+        <div>Component</div>
+        <div>Items</div>
+        <div>Total (%)</div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="component-row">
+        <div class="comp-title">Quiz</div>
+
+        <div class="comp-items" id="quizContainer">
+            <div class="item">
+                <span>Q1</span>
+                <input type="number" placeholder="Score" oninput="updateComponent('quiz')">
+                <span>/100</span>
+                <button onclick="this.parentElement.remove(); updateComponent('quiz')">x</button>
+            </div>
+        </div>
+
+        <div class="comp-total" id="quizTotal">0.00%</div>
+    </div>
+    <button class="add-btn" onclick="addItem('quiz')">+ Add Quiz</button>
+
+    <!-- LAB -->
+    <div class="component-row">
+        <div class="comp-title">Laboratory</div>
+
+        <div class="comp-items" id="labContainer"></div>
+
+        <div class="comp-total" id="labTotal">0.00%</div>
+    </div>
+    <button class="add-btn" onclick="addItem('lab')">+ Add Lab</button>
+
+    <!-- ASSIGNMENT -->
+    <div class="component-row">
+        <div class="comp-title">Assignment</div>
+
+        <div class="comp-items" id="assignContainer"></div>
+
+        <div class="comp-total" id="assignTotal">0.00%</div>
+    </div>
+    <button class="add-btn" onclick="addItem('assign')">+ Add Assignment</button>
+
+</div>
+
 <button class="add-btn" onclick="addSubject()">Add Subject</button>
 
 <table id="gradeTable">
@@ -414,6 +517,46 @@ function resetForm() {
     document.querySelectorAll(".equiv").forEach(e => e.innerText = "0");
 
     document.getElementById("average").innerText = "0";
+}
+    // 🔴 COMPONENT LOGIC
+
+function addItem(type) {
+    let container = document.getElementById(type + "Container");
+    let count = container.children.length + 1;
+
+    let label = type === "quiz" ? "Q" :
+                type === "lab" ? "L" : "A";
+
+    let item = document.createElement("div");
+    item.className = "item";
+
+    item.innerHTML = `
+        <span>${label}${count}</span>
+        <input type="number" placeholder="Score" oninput="updateComponent('${type}')">
+        <span>/100</span>
+        <button onclick="this.parentElement.remove(); updateComponent('${type}')">x</button>
+    `;
+
+    container.appendChild(item);
+}
+
+function updateComponent(type) {
+    let container = document.getElementById(type + "Container");
+    let inputs = container.querySelectorAll("input");
+
+    let total = 0;
+    let count = 0;
+
+    inputs.forEach(input => {
+        if (input.value !== "") {
+            total += parseFloat(input.value);
+            count++;
+        }
+    });
+
+    let avg = count > 0 ? total / count : 0;
+
+    document.getElementById(type + "Total").innerText = avg.toFixed(2) + "%";
 }
 </script>
 
