@@ -292,7 +292,7 @@ tr:hover{
 <tbody>
 
 <tr>
-<td>Quic (20%)</td>
+<td>Quiz (20%)</td>
 <td><input type="number" class="grade" oninput="calculateAll(this)"></td>
 <td class="equiv">0</td>
 <td>
@@ -557,7 +557,50 @@ function updateComponent(type) {
     let avg = count > 0 ? total / count : 0;
 
     document.getElementById(type + "Total").innerText = avg.toFixed(2) + "%";
+
+    // 🔥 AUTO UPDATE SUBJECTS EVERY TIME USER TYPES
+    updateSubjectFromComponents();
 }
+function updateSubjectFromComponents() {
+    // Get component averages
+    let quiz = parseFloat(document.getElementById("quizTotal").innerText) || 0;
+    let lab = parseFloat(document.getElementById("labTotal").innerText) || 0;
+    let assign = parseFloat(document.getElementById("assignTotal").innerText) || 0;
+
+    // Find subject rows
+    let rows = document.querySelectorAll("#gradeTable tbody tr");
+
+    rows.forEach(row => {
+        let subjectName = row.children[0].innerText.toLowerCase();
+        let input = row.querySelector(".grade");
+
+        if (!input) return;
+
+        let value = 0;
+
+        // Match subjects
+        if (subjectName.includes("quiz")) {
+            value = quiz;
+        }
+        else if (subjectName.includes("laboratory")) {
+            value = lab;
+        }
+        else if (subjectName.includes("assignment")) {
+            value = assign;
+        }
+        else {
+            return; // skip others
+        }
+
+        input.value = value.toFixed(2);
+
+        // Trigger recalculation
+        calculateAll(input);
+    });
+
+    calculateAverage();
+}
+
 </script>
 
 </body>
